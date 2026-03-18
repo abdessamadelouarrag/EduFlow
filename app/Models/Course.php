@@ -10,7 +10,11 @@ class Course extends Model
     use HasFactory;
 
     protected $fillable = [
-        'teacher_id', 'title', 'description', 'price', 'domain'
+        'teacher_id',
+        'title',
+        'description',
+        'price',
+        'domain'
     ];
 
     public function teacher()
