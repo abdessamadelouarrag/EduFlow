@@ -4,19 +4,19 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
-use League\Config\Exception\ValidationException;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
+
     public function signup(Request $request)
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:8'],
+            'password' => ['required', 'string', 'min:6'],
             'role' => ['required', 'in:student,teacher'],
         ]);
 
@@ -27,47 +27,66 @@ class AuthController extends Controller
             'role' => $validated['role'],
         ]);
 
-        $token = $user->createToken('api-token')->plainTextToken;
+        $token = auth('api')->login($user);
 
         return response()->json([
             'message' => 'Signup successful',
             'user' => $user,
-            'token' => $token,
+            'access_token' => $token,
+            'token_type' => 'bearer',
+            'expires_in' => auth('api')->factory()->getTTL() * 60,
         ], 201);
     }
 
-    public function login(Request $request){
-
+    public function login(Request $request)
+    {
         $validated = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required', 'string'],
         ]);
 
+        $credentials = [
+            'email' => $validated['email'],
+            'password' => $validated['password'],
+        ];
 
-        $user = User::where('email', $validated['email'])->first();
-
-
-        if (! $user || ! Hash::check($validated['password'], $user->password)) {
+        if (! $token = auth('api')->attempt($credentials)) {
             throw ValidationException::withMessages([
-                'email' => ['email incorrects!!!'],
+                'email' => ['Email or password is incorrect.'],
             ]);
         }
 
-        $token = $user->createToken('api-token')->plainTextToken;
-
         return response()->json([
-            'message'=> "login good!!",
-            'user' => $user,
-            'token' => $token,
+            'message' => 'Login successful',
+            'access_token' => $token,
+            'token_type' => 'bearer',
+            'expires_in' => auth('api')->factory()->getTTL() * 60,
+            'user' => auth('api')->user(),
         ]);
     }
 
-    public function logout(Request $request) {
-        
-        $request->user()->currentAccessToken()->delete();
+    public function me()
+    {
+        return response()->json(auth('api')->user());
+    }
+
+    public function logout()
+    {
+        auth('api')->logout();
 
         return response()->json([
-            'message' => "logout goood! by",
+            'message' => 'Successfully logged out',
+        ]);
+    }
+
+    public function refresh()
+    {
+        $token = auth('api')->refresh();
+
+        return response()->json([
+            'access_token' => $token,
+            'token_type' => 'bearer',
+            'expires_in' => auth('api')->factory()->getTTL() * 60,
         ]);
     }
 }
