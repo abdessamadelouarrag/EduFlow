@@ -1,0 +1,77 @@
+openapi: 3.0.3
+info:
+  title: EduFlow API
+  version: 1.0.0
+  description: API Laravel pour la gestion des cours, inscriptions, groupes, favoris et recommandations.
+servers:
+  - url: http://localhost:8000/api
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+paths:
+  /signup:
+    post:
+      summary: Inscription utilisateur
+      responses:
+        '201':
+          description: Utilisateur cree avec JWT
+  /login:
+    post:
+      summary: Connexion JWT
+      responses:
+        '200':
+          description: Token JWT retourne
+  /courses:
+    get:
+      summary: Lister les cours
+      responses:
+        '200':
+          description: Liste paginee des cours
+    post:
+      summary: Creer un cours enseignant
+      security:
+        - bearerAuth: []
+      responses:
+        '201':
+          description: Cours cree
+  /recommendations:
+    get:
+      summary: Recommandations pour un etudiant
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Liste des cours recommandes
+  /wishlist:
+    get:
+      summary: Liste des favoris etudiant
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Favoris retournes
+  /courses/{course}/enroll:
+    post:
+      summary: Inscription a un cours avec paiement simule Stripe
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: course
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '201':
+          description: Inscription creee et groupe attribue
+  /teacher/stats:
+    get:
+      summary: Statistiques enseignant
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Statistiques globales

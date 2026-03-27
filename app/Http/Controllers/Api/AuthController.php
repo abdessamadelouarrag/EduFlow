@@ -3,90 +3,110 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use Illuminate\Http\JsonResponse;
+use App\Services\AuthService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
+    public function __construct(
+        private readonly AuthService $authService
+    ) {
+    }
 
-    public function signup(Request $request)
+    public function signup(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:6'],
+            'password' => ['required', 'string', 'min:8'],
+            'password_confirmation' => ['required', 'same:password'],
             'role' => ['required', 'in:student,teacher'],
+            'interests' => ['nullable', 'array'],
+            'interests.*' => ['string', 'max:255'],
         ]);
-
-        $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-            'role' => $validated['role'],
-        ]);
-
-        $token = auth('api')->login($user);
 
         return response()->json([
             'message' => 'Signup successful',
-            'user' => $user,
-            'access_token' => $token,
-            'token_type' => 'bearer',
-            'expires_in' => auth('api')->factory()->getTTL() * 60,
+            ...$this->authService->register($validated),
         ], 201);
     }
 
-    public function login(Request $request)
+    public function login(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required', 'string'],
         ]);
 
-        $credentials = [
-            'email' => $validated['email'],
-            'password' => $validated['password'],
+        return response()->json([
+            'message' => 'Login successful',
+            ...$this->authService->login($validated),
+        ]);
+    }
+
+    public function me(): JsonResponse
+    {
+        return response()->json([
+            'user' => auth('api')->user()->loadMissing('interests'),
+        ]);
+    }
+
+    public function logout(): JsonResponse
+    {
+        $this->authService->logout();
+
+        return response()->json([
+            'message' => 'Successfully logged out.',
+        ]);
+    }
+
+    public function forgotPassword(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'email' => ['required', 'email'],
+        ]);
+
+        $result = $this->authService->sendResetLink($validated['email']);
+        $status = $result['status'];
+
+        if ($status !== Password::RESET_LINK_SENT) {
+            throw ValidationException::withMessages([
+                'email' => [__($status)],
+            ]);
+        }
+
+        $response = [
+            'message' => __($status),
         ];
 
-        if (! $token = auth('api')->attempt($credentials)) {
+        if (app()->environment(['local', 'testing'])) {
+            $response['reset_token'] = $result['token'];
+        }
+
+        return response()->json($response);
+    }
+
+    public function resetPassword(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'email' => ['required', 'email'],
+            'token' => ['required', 'string'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        $status = $this->authService->resetPassword($validated);
+
+        if ($status !== Password::PASSWORD_RESET) {
             throw ValidationException::withMessages([
-                'email' => ['Email or password is incorrect.'],
+                'email' => [__($status)],
             ]);
         }
 
         return response()->json([
-            'message' => 'Login successful',
-            'access_token' => $token,
-            'token_type' => 'bearer',
-            'expires_in' => auth('api')->factory()->getTTL() * 60,
-            'user' => auth('api')->user(),
-        ]);
-    }
-
-    public function me()
-    {
-        return response()->json(auth('api')->user());
-    }
-
-    public function logout()
-    {
-        auth('api')->logout();
-
-        return response()->json([
-            'message' => 'Successfully logged out',
-        ]);
-    }
-
-    public function refresh()
-    {
-        $token = auth('api')->refresh();
-
-        return response()->json([
-            'access_token' => $token,
-            'token_type' => 'bearer',
-            'expires_in' => auth('api')->factory()->getTTL() * 60,
+            'message' => __($status),
         ]);
     }
 }

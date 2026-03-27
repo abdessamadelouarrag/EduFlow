@@ -14,7 +14,7 @@ use Tests\TestCase;
 */
 
 pest()->extend(TestCase::class)
- // ->use(Illuminate\Foundation\Testing\RefreshDatabase::class)
+    ->use(Illuminate\Foundation\Testing\RefreshDatabase::class)
     ->in('Feature');
 
 /*
@@ -43,7 +43,11 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+function authHeadersFor(\App\Models\User $user): array
 {
-    // ..
+    $token = auth('api')->login($user);
+
+    return [
+        'Authorization' => 'Bearer '.$token,
+    ];
 }
