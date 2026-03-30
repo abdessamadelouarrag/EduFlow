@@ -5,101 +5,106 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
         body {
-            font-family: Arial, Helvetica, sans-serif;
-            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            background: #f3f4f6;
             display: flex;
-            align-items: center;
             justify-content: center;
-            background: #f4f7fb;
-            padding: 24px;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
         }
 
-        .card {
-            width: 100%;
-            max-width: 420px;
-            background: #ffffff;
-            border-radius: 18px;
-            padding: 36px 30px;
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+        .box {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            width: 320px;
         }
 
         h1 {
             text-align: center;
-            font-size: 30px;
-            color: #1f2937;
-            margin-bottom: 10px;
+            margin-bottom: 20px;
         }
 
-        p {
-            text-align: center;
-            color: #6b7280;
-            margin-bottom: 24px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: #374151;
-            font-weight: bold;
+        input,
+        button,
+        a {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            box-sizing: border-box;
         }
 
         input {
-            width: 100%;
-            padding: 12px 14px;
-            margin-bottom: 18px;
-            border: 1px solid #d1d5db;
-            border-radius: 10px;
-            font-size: 15px;
-        }
-
-        button,
-        .back-link {
-            width: 100%;
-            display: inline-block;
-            text-align: center;
-            text-decoration: none;
-            padding: 13px;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: bold;
+            border: 1px solid #ccc;
         }
 
         button {
             border: none;
             background: #2563eb;
-            color: #ffffff;
+            color: white;
             cursor: pointer;
-            margin-bottom: 12px;
         }
 
-        .back-link {
-            background: #e5edff;
-            color: #1d4ed8;
+        a {
+            display: block;
+            text-align: center;
+            text-decoration: none;
+            background: #e5e7eb;
+            color: black;
+        }
+
+        #message {
+            text-align: center;
+            font-size: 14px;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
-    <div class="card">
+    <div class="box">
         <h1>Login</h1>
-        <p>Enter your email and password.</p>
 
-        <form>
-            <label for="email">Email</label>
-            <input type="email" id="email" name="email" placeholder="Enter your email">
-
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password" placeholder="Enter your password">
-
+        <form id="loginForm">
+            <input type="email" id="email" placeholder="Email" required>
+            <input type="password" id="password" placeholder="Password" required>
             <button type="submit">Login</button>
-            <a href="/" class="back-link">Back Home</a>
         </form>
+
+        <a href="/">Back Home</a>
+        <p id="message"></p>
     </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            const response = await fetch('/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    email: email,
+                    password: password
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                document.getElementById('message').textContent = data.message;
+            } else {
+                document.getElementById('message').textContent = data.message || 'Login error';
+            }
+        });
+    </script>
 </body>
 </html>
