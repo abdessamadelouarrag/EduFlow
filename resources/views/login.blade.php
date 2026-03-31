@@ -81,27 +81,50 @@
 
     <script src="/app.js"></script>
     <script>
-        document.getElementById('loginForm').addEventListener('submit', async function (e) {
+        const formLogin = document.getElementById('loginForm');
+        const msgForm = document.getElementById('message');
+
+        formLogin.addEventListener('submit', async function (e) {
             e.preventDefault();
 
-            const message = document.getElementById('message');
-            message.textContent = '';
+            const emailUser = document.getElementById('email');
+            const passwordUser = document.getElementById('password');
 
             try {
-                const data = await EduFlow.api('/api/login', {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        email: document.getElementById('email').value,
-                        password: document.getElementById('password').value
+                console.log("start")
+                const response = await fetch('/api/login', {
+                    method : "POST",
+                    headers : {
+                        'Content-type' : 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body : JSON.stringify({
+                        email : emailUser.value,
+                        password : passwordUser.value
                     })
                 });
 
-                EduFlow.setAuth(data);
+                
+                console.log("after json");
+                const data = await response.json();
+
+                if(response.ok){
+                    msgForm.textContent = 'Login Good !';
+                    msgForm.style = "color: #2563eb;"
+
+                    if(data.access_token){
+                        localStorage.setItem('token', data.access_token);
+                    }
+                }
+                else{
+                    msgForm.textContent = data.message || 'Login faild';
+                }
+
                 window.location.href = '/dashboard';
             } catch (error) {
-                message.textContent = error.message || 'Login error';
+                msgForm.textContent = "error connection error server";
             }
-        });
+        })
     </script>
 </body>
 </html>
