@@ -63,6 +63,7 @@
             text-align: center;
             font-size: 14px;
             margin-top: 10px;
+            color: #b91c1c;
         }
     </style>
 </head>
@@ -78,7 +79,6 @@
                 <option value="student">Student</option>
                 <option value="teacher">Teacher</option>
             </select>
-
             <button type="submit">Signup</button>
         </form>
 
@@ -86,35 +86,29 @@
         <p id="message"></p>
     </div>
 
+    <script src="/app.js"></script>
     <script>
         document.getElementById('signupForm').addEventListener('submit', async function (e) {
             e.preventDefault();
 
-            const name = document.getElementById('name').value;
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const role = document.getElementById('role').value;
+            const message = document.getElementById('message');
+            message.textContent = '';
 
-            const response = await fetch('/api/signup', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({
-                    name: name,
-                    email: email,
-                    password: password,
-                    role: role
-                })
-            });
+            try {
+                const data = await EduFlow.api('/api/signup', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        name: document.getElementById('name').value,
+                        email: document.getElementById('email').value,
+                        password: document.getElementById('password').value,
+                        role: document.getElementById('role').value
+                    })
+                });
 
-            const data = await response.json();
-
-            if (response.ok) {
-                document.getElementById('message').textContent = data.message;
-            } else {
-                document.getElementById('message').textContent = data.message || 'Signup error';
+                EduFlow.setAuth(data);
+                window.location.href = '/dashboard';
+            } catch (error) {
+                message.textContent = error.message || 'Signup error';
             }
         });
     </script>

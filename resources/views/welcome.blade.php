@@ -3,98 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home</title>
+    <title>EduFlow Home</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
         body {
-            font-family: Arial, Helvetica, sans-serif;
+            font-family: Arial, sans-serif;
+            background: #f3f4f6;
+            margin: 0;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #f4f7fb;
-            padding: 24px;
+            padding: 20px;
         }
 
-        .card {
+        .box {
+            background: white;
+            border-radius: 14px;
+            padding: 30px;
             width: 100%;
             max-width: 420px;
-            background: #ffffff;
-            border-radius: 18px;
-            padding: 40px 30px;
             text-align: center;
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
-        }
-
-        .small-text {
-            color: #2563eb;
-            font-size: 14px;
-            font-weight: bold;
-            margin-bottom: 12px;
         }
 
         h1 {
-            font-size: 32px;
-            color: #1f2937;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
 
         p {
-            color: #6b7280;
-            font-size: 16px;
-            line-height: 1.6;
-            margin-bottom: 28px;
+            color: #555;
+            margin-bottom: 24px;
         }
 
-        .buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-        }
-
-        .btn {
-            display: inline-block;
+        a {
+            display: block;
             text-decoration: none;
-            padding: 14px;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: bold;
-            transition: 0.2s ease;
-        }
-
-        .btn-login {
+            margin-bottom: 12px;
+            padding: 12px;
+            border-radius: 8px;
             background: #2563eb;
-            color: #ffffff;
+            color: white;
         }
 
-        .btn-signup {
-            background: #e5edff;
-            color: #1d4ed8;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            opacity: 0.95;
+        a.secondary {
+            background: #e5e7eb;
+            color: #111827;
         }
     </style>
 </head>
 <body>
-    <div class="card">
-        <div class="small-text">EduFlow</div>
-        <h1>Welcome Home</h1>
-        <p>
-            This is a simple home page with two buttons for login and signup.
-        </p>
+    <div class="box">
+        <h1>EduFlow</h1>
+        <p>Simple front-end to consume your API.</p>
 
-        <div class="buttons">
-            <a href="/login" class="btn btn-login">Login</a>
-            <a href="/signup" class="btn btn-signup">Signup</a>
-        </div>
+        <a href="/login">Login</a>
+        <a href="/signup">Signup</a>
+        <a href="/cours" class="secondary">Courses</a>
+        <a href="/dashboard" class="secondary">Dashboard</a>
     </div>
 </body>
 </html>

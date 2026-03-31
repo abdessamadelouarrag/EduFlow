@@ -61,6 +61,7 @@
             text-align: center;
             font-size: 14px;
             margin-top: 10px;
+            color: #b91c1c;
         }
     </style>
 </head>
@@ -78,31 +79,27 @@
         <p id="message"></p>
     </div>
 
+    <script src="/app.js"></script>
     <script>
         document.getElementById('loginForm').addEventListener('submit', async function (e) {
             e.preventDefault();
 
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+            const message = document.getElementById('message');
+            message.textContent = '';
 
-            const response = await fetch('/api/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({
-                    email: email,
-                    password: password
-                })
-            });
+            try {
+                const data = await EduFlow.api('/api/login', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        email: document.getElementById('email').value,
+                        password: document.getElementById('password').value
+                    })
+                });
 
-            const data = await response.json();
-
-            if (response.ok) {
-                document.getElementById('message').textContent = data.message;
-            } else {
-                document.getElementById('message').textContent = data.message || 'Login error';
+                EduFlow.setAuth(data);
+                window.location.href = '/dashboard';
+            } catch (error) {
+                message.textContent = error.message || 'Login error';
             }
         });
     </script>
